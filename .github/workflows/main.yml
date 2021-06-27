@@ -71,11 +71,7 @@ jobs:
       - name: Pull Image
         if: always()
         run: ssh deploy 'docker pull $DOCKER_TAG && docker prune -f'
-        env:
-          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
         
       - name: Start Container
         if: always()
         run: ssh deploy 'docker run -e SECRET_JWT -p 80:3000 --name api -d $DOCKER_TAG'
-        env:
-          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
