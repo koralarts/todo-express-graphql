@@ -1,11 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "rootDir": "./srcs",
     "outDir": "./build",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "strict": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules/*"
+  ]
 }

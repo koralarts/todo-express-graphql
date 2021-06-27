@@ -2,9 +2,11 @@
   "name": "todo-express-graphql",
   "version": "0.0.0",
   "description": "Todo API using Express and GraphQL",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.ts",
+    "start": "nodemon build/index.js",
+    "build": "rm -rf build/ && tsc -p tsconfig.json",
+    "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -8,3 +8,6 @@ export const typeDefs = gql`
       _empty: String
   }
 `
+
+export * as userSchema from './user';
+export * as taskSchema from './task';
