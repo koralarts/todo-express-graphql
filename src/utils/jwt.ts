@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET_KEY = 'TODO';
+const JWT_SECRET_KEY = process.env.SECRET_JWT || 'missing key';
 
 export type JWTPayload = string | Buffer | object;
 

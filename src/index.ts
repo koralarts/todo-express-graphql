@@ -2,6 +2,9 @@
 
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import { typeDefs, userSchema, taskSchema } from './schemas';
 import { User } from './types/user';
