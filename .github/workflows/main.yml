@@ -70,7 +70,7 @@ jobs:
           
       - name: Pull Image
         if: always()
-        run: ssh deploy 'docker pull $DOCKER_TAG && docker prune -f'
+        run: ssh deploy 'echo $DOCKER_TAG && docker pull $DOCKER_TAG && docker prune -f'
         
       - name: Start Container
         if: always()
