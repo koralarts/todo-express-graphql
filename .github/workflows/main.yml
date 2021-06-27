@@ -53,7 +53,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/deploy.key
           chmod 600 ~/.ssh/deploy.key
-          cat >> ~/.ssh/config <<END
+          cat >> ~/.ssh/config << END
           Host deploy
             HostName $SSH_HOST
             User $SSH_USER
@@ -64,6 +64,9 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          
+      - name: Check Config
+        run: cat ~/.ssh/config
           
       - name: Stop and Delete Container
         run: ssh deploy 'docker stop api && docker rm api'
