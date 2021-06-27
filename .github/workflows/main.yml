@@ -51,29 +51,29 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          echo "$SSH_PUB_KEY" > ~/.ssh/id_rsa.pub
-          ssh-add ~/.ssh/id_rsa
+          echo "$SSH_KEY" > ~/.ssh/deploy.key
+          chmod 600 ~/.ssh/deploy.key
+          cat >> ~/.ssh/config << END
+          Host deploy
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy.key
+            StrictHostKeyChecking no
+          END
         env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_PUB_KEY: ${{ secrets.SSH_PUB_KEY }}
           
       - name: Stop and Delete Container
-        run: ssh $SSH_USER@$SSH_HOST 'docker stop api && docker rm api'
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+        run: ssh deploy 'docker stop api && docker rm api'
           
       - name: Pull Image
-        run: ssh $SSH_USER@$SSH_HOST 'docker pull $DOCKER_TAG && docker prune -f'
+        run: ssh deploy 'docker pull $DOCKER_TAG && docker prune -f'
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
           DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
         
       - name: Start Container
-        run: ssh $SSH_USER@$SSH_HOST 'docker run -e SECRET_JWT -p 80:3000 --name api -d $DOCKER_TAG'
+        run: ssh deploy 'docker run -e SECRET_JWT -p 80:3000 --name api -d $DOCKER_TAG'
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
           DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
