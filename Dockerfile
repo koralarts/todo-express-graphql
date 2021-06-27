@@ -8,10 +8,8 @@ COPY . /var/www/api
 
 RUN ls -a
 
-RUN cd /var/www/api && npm install && mv node_modules ../
+RUN cd /var/www/api && npm install && mv node_modules ../ && npm run build
 
 EXPOSE 3000
-
-RUN ["npm", "run", "build"]
 
 CMD ["npm", "run", "start"]
