@@ -74,4 +74,4 @@ jobs:
         
       - name: Start Container
         if: always()
-        run: ssh deploy 'docker run -e SECRET_JWT -e VIRTUAL_HOST -p 3000:3000 --name api -d koralarts/todo-express-graphql'
+        run: ssh deploy 'docker run -e SECRET_JWT -e VIRTUAL_HOST --expose 3000 --name api -d koralarts/todo-express-graphql'
