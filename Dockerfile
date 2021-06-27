@@ -4,11 +4,11 @@ WORKDIR /usr/src/app
 
 COPY ["package.json", "tsconfig.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
 
-COPY . .
+COPY . /var/www/api
 
 RUN ls -a
 
-RUN npm install && mv node_modules ../
+RUN cd /var/www/api && npm install && mv node_modules ../
 
 EXPOSE 3000
 
