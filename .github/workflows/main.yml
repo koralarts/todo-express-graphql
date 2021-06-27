@@ -54,7 +54,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/staging.key
           chmod 600 ~/.ssh/staging.key
           cat >>~/.ssh/config <<END
-          Host staging
+          Host deploy
             HostName $SSH_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/staging.key
@@ -64,3 +64,16 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          
+      - name: Stop and Delete Container
+        run: ssh deploy 'docker stop api && docker rm api'
+          
+      - name: Pull Image
+        run: ssh deploy 'docker pull $DOCKER_TAG && docker prune -f'
+        env:
+          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
+        
+      - name: Start Container
+        run: ssh deploy 'docker run -e SECRET_JWT -p 80:3000 --name api -d $DOCKER_TAG'
+        env:
+          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
