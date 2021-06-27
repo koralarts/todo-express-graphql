@@ -70,8 +70,8 @@ jobs:
           
       - name: Pull Image
         if: always()
-        run: ssh deploy 'echo $DOCKER_TAG && docker pull $DOCKER_TAG && docker prune -f'
+        run: ssh deploy 'docker pull koralarts/todo-express-graphql && docker prune -f'
         
       - name: Start Container
         if: always()
-        run: ssh deploy 'docker run -e SECRET_JWT -p 80:3000 --name api -d $DOCKER_TAG'
+        run: ssh deploy 'docker run -e SECRET_JWT -p 80:3000 --name api -d koralarts/todo-express-graphql'
