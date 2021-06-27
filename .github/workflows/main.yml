@@ -70,7 +70,7 @@ jobs:
           
       - name: Pull Image
         if: always()
-        run: ssh deploy 'docker pull koralarts/todo-express-graphql && docker prune -f'
+        run: ssh deploy 'docker pull koralarts/todo-express-graphql && docker image prune -f'
         
       - name: Start Container
         if: always()
