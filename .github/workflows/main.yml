@@ -53,6 +53,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           echo "$SSH_PUB_KEY" > ~/.ssh/id_rsa.pub
+          ssh-add ~/.ssh/id_rsa
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_PUB_KEY: ${{ secrets.SSH_PUB_KEY }}
