@@ -6,16 +6,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+import DatabseService from './db';
+import { getUser } from './db/user';
 import { typeDefs, userSchema, taskSchema } from './schemas';
 import { User } from './types/user';
-
 import { verifyJWT } from './utils/jwt';
 
 const PORT = 3000;
 
 (async function() {
+  await DatabseService.config();
+
   const server = new ApolloServer({
-    context({ req }) {
+    async context({ req }) {
       const token = req.headers?.authorization || '';
 
       if (!token) {
@@ -23,7 +26,7 @@ const PORT = 3000;
       }
 
       const data = verifyJWT(token);
-      const me: User | undefined = userSchema.allUsers.find(user => user._id === data?._id);
+      const me: User | null = await getUser({ _id: data._id });
 
       return { me }
     },

@@ -5,7 +5,9 @@ import cloneDeep from 'lodash/cloneDeep';
 import bcrypt from 'bcrypt';
 
 import { generateJWT } from '../utils/jwt';
+import { GraphqlContext } from '../types';
 import { User, UserCreate, UserUpdate, UserLogin } from '../types/user';
+import { addUser, getUser, updateUser } from '../db/user';
 
 const SALT_ROUNDS = 10;
 
@@ -46,8 +48,8 @@ export const resolvers = {
     }
   },
   Mutation: {
-    addUser(parent: undefined, { email, username, password }: UserCreate): User {
-      const existingUser = allUsers.find((user: User) => user.email === email || user.username === username)
+    async addUser(parent: undefined, { email, username, password }: UserCreate): Promise<User> {
+      const existingUser: User | null = await getUser({ email, username });
 
       if (!!existingUser) {
         throw new Error("User with email or username already exists.");
@@ -61,28 +63,34 @@ export const resolvers = {
         password: hashedPassword
       };
 
-      allUsers.push(user)
+      await addUser(user);
 
       return user;
     },
-    updateUser(parent: undefined, { email, username }: UserUpdate, context: any): User {
-      const userIndex = allUsers.findIndex((user: User) => user._id === context?._id)
-
-      if (userIndex < 0) {
+    async updateUser(parent: undefined, { email, username }: UserUpdate, { me }: GraphqlContext): Promise<User> {
+      if (!me) {
         throw Error("You don't have permission to update resource.");
       }
 
-      const userClone = cloneDeep(allUsers[userIndex])
-      allUsers[userIndex] = {
+      const user: User | null = await getUser({ _id: me._id });
+
+      if (!user) {
+        throw Error("You don't have permission to update resource.");
+      }
+
+      let userClone = cloneDeep(user)
+      userClone = {
         ...userClone,
         email,
         username
       }
 
-      return allUsers[userIndex]
+      await updateUser(userClone);
+
+      return userClone;
     },
-    login(parent: undefined, { username, password }: UserLogin): User | null {
-      const user: User | undefined = allUsers.find((user: User) => user.username === username)
+    async login(parent: undefined, { username, password }: UserLogin): Promise<User | null> {
+      const user: User | null = await getUser({ username })
 
       if (!user) {
         return null;
