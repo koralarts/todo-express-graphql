@@ -66,4 +66,4 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           
       - name: Docker
-        run: ssh deploy 'docker compose up'
+        run: ssh deploy 'docker-compose up'
