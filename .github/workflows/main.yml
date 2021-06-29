@@ -65,13 +65,5 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
           
-      - name: Stop and Delete Container
-        run: ssh deploy 'docker stop api && docker rm api'
-          
-      - name: Pull Image
-        if: always()
-        run: ssh deploy 'docker pull koralarts/todo-express-graphql && docker image prune -f'
-        
-      - name: Start Container
-        if: always()
-        run: ssh deploy 'docker run -e SECRET_JWT -e VIRTUAL_HOST --expose 3000 --name api -d koralarts/todo-express-graphql'
+      - name: Docker
+        run: ssh deploy 'docker compose up'
