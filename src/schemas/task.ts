@@ -1,12 +1,11 @@
 import { gql } from 'apollo-server';
 import { v4 as uuidV4 } from 'uuid';
-import cloneDeep from 'lodash/cloneDeep'
+import cloneDeep from 'lodash/cloneDeep';
+import { Cursor } from 'mongodb';
 
-import allTasksJSON from '../data/tasks';
 import { GraphqlContext } from '../types';
 import { Task, TaskCreate, TaskUpdate } from '../types/task'
-
-const allTasks: Task[] = [...allTasksJSON]
+import { addTask, getTask, getTasks, updateTask, deleteTask } from '../db/task';
 
 export const typedefs = gql`
   type Task {
@@ -28,27 +27,34 @@ export const typedefs = gql`
   extend type Mutation {
     addTask(description: String!): Task
     updateTask(_id: String!, description: String, completed: Boolean, dateCompleted: String, deadline: String): Task
+    deleteTask(_id: String!): Task
   }
 `
 
 export const resolvers = {
   Query: {
-    task(parent: undefined, { _id }: Task, { me }: GraphqlContext): Task | null | undefined {
-      const task = allTasks.find((task: Task) => task._id === _id)
-      return task?.user_id === me?._id ? task : null;
-    },
-    tasks(parent: undefined, params: undefined, { me }: GraphqlContext): Task[] | null | undefined {
+    async task(parent: undefined, { _id }: Task, { me }: GraphqlContext): Promise<Task | null> {
       if (!me) {
-        return null;
+        return Promise.resolve(null);
       }
 
-      return allTasks.filter((task) => task.user_id === me._id);
+      return await getTask({ _id });
+    },
+    async tasks(parent: undefined, params: undefined, { me }: GraphqlContext): Promise<Task[] | null> {
+      if (!me) {
+        return Promise.resolve(null);
+      }
+
+      const taskCursor = await getTasks({ user_id: me._id });
+
+
+      return await getTasks({ user_id: me._id }).toArray();
     }
   },
   Mutation: {
-    addTask(parent: undefined, { description }: TaskCreate, { me }: GraphqlContext): Task  {
+    async addTask(parent: undefined, { description }: TaskCreate, { me }: GraphqlContext): Promise<Task>  {
       if (!me) {
-        throw Error("You don't have permission to perform this action.")
+        throw Error("You don't have permission to perform this action.");
       }
 
       const task: Task = {
@@ -60,24 +66,41 @@ export const resolvers = {
         createdOn: `${Date.now()}`
       }
 
-      allTasks.push(task)
+      await addTask(task)
 
       return { ...task, user: me }
     },
-    updateTask(parent: undefined, { _id, ...rest }: TaskUpdate, { me }: GraphqlContext): Task {
+    async updateTask(parent: undefined, { _id, ...rest }: TaskUpdate, { me }: GraphqlContext): Promise<Task> {
       if (!me) {
+        throw Error("You don't have permission to perform this action.");
+      }
+
+      const task: Task | null = await getTask({ _id, user_id: me._id });
+
+      if (!task) {
         throw Error("You don't have permission to perform this action.")
       }
 
-      const taskIndex = allTasks.findIndex((value: Task) => value._id === _id);
-      const taskClone = cloneDeep(allTasks[taskIndex]);
-      allTasks[taskIndex] = {
-        ...taskClone,
-        ...rest,
-        user: me
+      const taskClone = { ...cloneDeep(task), ...rest }
+
+      await updateTask(taskClone);
+
+      return taskClone;
+    },
+    async deleteTask(parent: undefined, { _id }: Task, { me }: GraphqlContext): Promise<Task> {
+      if (!me) {
+        throw Error("You don't have permission to perform this action.");
       }
 
-      return allTasks[taskIndex];
+      const task: Task | null = await getTask({ _id, user_id: me._id });
+
+      if (!task) {
+        throw Error("You don't have permission to perform this action.")
+      }
+
+      await deleteTask(_id);
+
+      return task;
     }
   }
 }

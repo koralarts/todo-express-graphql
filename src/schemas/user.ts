@@ -40,8 +40,8 @@ export const resolvers = {
     me(parent: undefined, data: undefined, context: any): null {
       return context?.me;
     },
-    user(parent: undefined, { _id }: User): User | undefined {
-      return allUsers.find((user) => user._id === _id)
+    async user(parent: undefined, { _id }: User): Promise<User | null> {
+      return await getUser({ _id });
     },
     users(): User[] {
       return allUsers
@@ -93,7 +93,7 @@ export const resolvers = {
       const user: User | null = await getUser({ username })
 
       if (!user) {
-        return null;
+        throw Error("Username or password provided was incorrect.");
       }
 
       if (bcrypt.compareSync(password, user.password)) {

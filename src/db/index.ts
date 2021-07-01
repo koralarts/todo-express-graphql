@@ -2,7 +2,7 @@ import { MongoClient, Collection } from "mongodb";
 
 import { DatabaseService } from "../types/db";
 
-const MONGO_CONNECTION_STRING = "mongodb://db:27017";
+const MONGO_CONNECTION_STRING = "mongodb://localhost:27017";
 const MONGO_DB_NAME = "todo-api";
 
 const DbService: DatabaseService = {
