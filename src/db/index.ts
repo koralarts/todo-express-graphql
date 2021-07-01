@@ -9,7 +9,7 @@ const DbService: DatabaseService = {
   db: null,
   async config(connectionString = MONGO_CONNECTION_STRING, dbName = MONGO_DB_NAME, connectionOpts = {}) {
     if (this.db) {
-      return Promise.resolve(this.db);
+      return;
     }
 
     try {
