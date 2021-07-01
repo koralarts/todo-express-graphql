@@ -1,8 +1,8 @@
-import { MongoClient, Db } from "mongodb";
+import { MongoClient, Collection } from "mongodb";
 
 import { DatabaseService } from "../types/db";
 
-const MONGO_CONNECTION_STRING = "mongodb://localhost:27017";
+const MONGO_CONNECTION_STRING = "mongodb://db:27017";
 const MONGO_DB_NAME = "todo-api";
 
 const DbService: DatabaseService = {
@@ -20,17 +20,88 @@ const DbService: DatabaseService = {
       console.log(`Databse: ${MONGO_DB_NAME}`);
 
       try {
-        await db.createCollection('users');
+        await db.createCollection('users', {
+          validator: {
+            bsonType: 'object',
+            required: ['_id', 'email', 'username', 'password'],
+            _id: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            email: {
+              bsonType: 'string',
+              pattern: '^.+@.+\.[\w]+$',
+              description: 'must be string and required'
+            },
+            name: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            password: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            }
+          }
+        });
         console.log('Collection created: users');
       } catch (e) {
-        console.log('Collection already exists: users');
+        if (e.codeName === 'NamespaceExists') {
+          console.log('Users collections already exists.')
+        } else {
+          console.log('[ERROR] Creating users collection', e);
+        }
       }
 
       try {
-        await db.createCollection('tasks');
+        await db.createCollection('tasks', {
+          validator: {
+            bsonType: 'object',
+            required: ['_id', 'user', 'description', 'updatedOn', 'createdOn'],
+            _id: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            name: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            description: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            user: {
+              bsonType: 'string',
+              description: 'must be string and required'
+            },
+            completed: {
+              bsonType: 'boolean',
+              description: 'must be boolean'
+            },
+            dateCompleted: {
+              bsonType: 'int',
+              description: 'must be int'
+            },
+            deadline: {
+              bsonType: 'int',
+              description: 'must be int'
+            },
+            updatedOn: {
+              bsonType: 'int',
+              description: 'must be int'
+            },
+            createdOn: {
+              bsonType: 'int',
+              description: 'must be int'
+            }
+          }
+        });
         console.log('Collection created: tasks');
       } catch (e) {
-        console.log('Collection already exists: tasks');
+        if (e.codeName === 'NamespaceExists') {
+          console.log('Tasks collections already exists.')
+        } else {
+          console.log('[ERROR] Creating tasks collection', e);
+        }
       }
 
       this.db = db;
