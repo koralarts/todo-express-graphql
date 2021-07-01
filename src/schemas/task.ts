@@ -45,9 +45,6 @@ export const resolvers = {
         return Promise.resolve(null);
       }
 
-      const taskCursor = await getTasks({ user_id: me._id });
-
-
       return await getTasks({ user_id: me._id }).toArray();
     }
   },

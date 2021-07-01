@@ -2,8 +2,7 @@ export type User = {
   _id: string,
   email: string,
   username: string,
-  password: string,
-  token?: string
+  password: string
 }
 
 export type UserCreate = Exclude<User, "_id">
@@ -14,3 +13,7 @@ export type UserUpdate = User & {
 }
 
 export type UserLogin = Pick<User, "username" | "password">
+
+export type UserToken = {
+  token: string
+}

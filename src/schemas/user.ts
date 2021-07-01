@@ -6,12 +6,10 @@ import bcrypt from 'bcrypt';
 
 import { generateJWT } from '../utils/jwt';
 import { GraphqlContext } from '../types';
-import { User, UserCreate, UserUpdate, UserLogin } from '../types/user';
-import { addUser, getUser, updateUser } from '../db/user';
+import { User, UserCreate, UserUpdate, UserLogin, UserToken } from '../types/user';
+import { addUser, getUser, getUsers, updateUser } from '../db/user';
 
 const SALT_ROUNDS = 10;
-
-export const allUsers: User[] = [];
 
 export const typeDefs: DocumentNode = gql`
   type User {
@@ -22,14 +20,24 @@ export const typeDefs: DocumentNode = gql`
     token: String
   }
 
+  type PublicUser {
+    _id: ID!
+    email: String!
+    username: String!
+  }
+
+  type TokenUser {
+    token: String!
+  }
+
   extend type Query {
     me: User
-    user(_id: String!): User
-    users: [User]
+    user(_id: String, username: String, email: String): User
+    users: [PublicUser]
   }
 
   extend type Mutation {
-    login(username: String!, password: String!): User
+    login(username: String!, password: String!): TokenUser
     addUser(email: String!, username: String!, password: String!): User
     updateUser(email: String, username: String): User
   }
@@ -40,11 +48,11 @@ export const resolvers = {
     me(parent: undefined, data: undefined, context: any): null {
       return context?.me;
     },
-    async user(parent: undefined, { _id }: User): Promise<User | null> {
-      return await getUser({ _id });
+    async user(parent: undefined, data: User): Promise<User | null> {
+      return await getUser(data);
     },
-    users(): User[] {
-      return allUsers
+    async users(): Promise<User[]> {
+      return await getUsers().toArray();
     }
   },
   Mutation: {
@@ -89,7 +97,7 @@ export const resolvers = {
 
       return userClone;
     },
-    async login(parent: undefined, { username, password }: UserLogin): Promise<User | null> {
+    async login(parent: undefined, { username, password }: UserLogin): Promise<UserToken | null> {
       const user: User | null = await getUser({ username })
 
       if (!user) {
@@ -98,7 +106,6 @@ export const resolvers = {
 
       if (bcrypt.compareSync(password, user.password)) {
         return {
-          ...user,
           token: generateJWT({ _id: user._id })
         };
       }

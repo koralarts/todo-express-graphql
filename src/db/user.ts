@@ -7,3 +7,5 @@ export const addUser = (user: User) => DatabseService.use<User>('user').insertOn
 export const updateUser = (user: User) => DatabseService.use<User>('user').replaceOne({ _id: user._id }, user);
 
 export const getUser = (query: FilterQuery<User>) => DatabseService.use<User>('user').findOne(query);
+
+export const getUsers = (query: FilterQuery<User> = {}) => DatabseService.use<User>('user').find(query);
